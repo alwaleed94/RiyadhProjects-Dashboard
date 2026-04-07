@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { projects } from "./data/projects";
 import ProjectCard from "./components/ProjectCard";
@@ -6,11 +6,27 @@ import MapView from "./components/MapView";
 
 const categories = ["الكل", "نقل", "جودة حياة", "تطوير حضري", "بيئة", "تراث وسياحة"];
 
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("الكل");
   const [selectedId, setSelectedId] = useState(projects[0].id);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const mapPanelId = "map-panel-section";
+
+  // Scroll to map panel when a project is selected
+  const handleSelectProject = (id) => {
+    setSelectedId(id);
+    // Try both documentElement and body for cross-browser compatibility
+    setTimeout(() => {
+      if (document.documentElement) {
+        document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      if (document.body) {
+        document.body.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 0);
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -197,7 +213,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="dashboard-panel map-panel">
+          <div className="dashboard-panel map-panel" id={mapPanelId}>
             <div className="panel-header">
               <h2>الخريطة التفاعلية</h2>
               <p>اضغط على أي مشروع لإبرازه.</p>
@@ -226,7 +242,7 @@ export default function App() {
                   key={project.id}
                   project={project}
                   selected={selectedProject?.id === project.id}
-                  onSelect={setSelectedId}
+                  onSelect={handleSelectProject}
                 />
               ))}
             </div>
