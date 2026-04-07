@@ -69,12 +69,26 @@ export default function Homepage() {
           <p>
             تم التنفيذ بواسطة <strong>الوليد بن نوح</strong> © 2026
           </p>
-
-          <a href="mailto:alwaleednu@gmail.com" className="footer-link">
-             alwaleednu@gmail.com | 🔗LinkedIn Profile 📧
-          </a>
-
-          
+          <p style={{ margin: 0, whiteSpace: "nowrap" }}>
+            <span style={{ marginLeft: 6 }}></span>
+            <a
+              href="mailto:alwaleednu@gmail.com"
+              className="footer-link"
+              style={{ marginLeft: 10 }}
+            >
+              alwaleednu@gmail.com
+            </a>
+            <span style={{ margin: "0 8px" }}>|</span>
+            <a
+              href="https://www.linkedin.com/in/alwaleed-bin-nouh-/"
+              className="footer-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginRight: 10 }}
+            >
+              LinkedIn Profile
+            </a>
+          </p>
         </div>
       </footer>
       <header className="hero">

@@ -1,3 +1,38 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero__text h1, .section-head h2, .panel-header h2 {
+  animation: fadeIn 1.2s cubic-bezier(.23,1.01,.32,1) both;
+}
+
+.theme-toggle, .filter-pills button {
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+}
+.theme-toggle:hover, .filter-pills button:hover {
+  background: linear-gradient(90deg, #22c55e 0%, #ffd700 100%);
+  color: #0a1f16;
+  transform: scale(1.07);
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-card {
+  animation: fadeInUp 0.8s cubic-bezier(.23,1.01,.32,1) both;
+}
 :root {
   --bg: #07111f;
   --bg-soft: #0e1a2b;
@@ -466,7 +501,7 @@ input {
 }
 
 .footer-link {
-  margin-top: 10px;
+  margin-top: 0;
   color: #22c55e;
   font-weight: bold;
   text-decoration: none;
