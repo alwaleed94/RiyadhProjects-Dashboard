@@ -191,7 +191,7 @@ export const projects = [
     gradient: "linear-gradient(135deg, #92400e, #d97706)",
     icon: "🏛️",
     iconLabel: { ar: "تراث", en: "Heritage" },
-    image: "https://www.rcrc.gov.sa/wp-content/uploads/2023/07/%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC-%D8%A7%D9%84%D8%AA%D8%B7%D9%8A%D8%B1-2-1024x682.jpg",
+    image: "https://aqar.net.sa/wp-content/uploads/2025/01/f374aa46090340e89277805e5ef9f07b-1.webp",
     summary: {
       ar: "وجهة تاريخية وثقافية كبرى تجمع بين التراث النجدي والتطوير الحديث.",
       en: "A major historical and cultural destination combining Najdi heritage and modern development."
