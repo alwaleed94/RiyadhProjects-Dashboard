@@ -348,6 +348,5 @@ export const projects = [
       { label: { ar: "المسطحات المائية", en: "Water Features" }, value: { ar: "8", en: "8" } },
       { label: { ar: "سنة الافتتاح المتوقع", en: "Expected Opening Year" }, value: { ar: "2026", en: "2026" } }
     ],
-    sourceNote: { ar: "مؤشر متابعة", en: "Target Indicator" }
-  }
-];
+    sourceNote: { ar: "مؤشر متابعة", en: "Target Indicator" }  }];
+

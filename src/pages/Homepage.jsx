@@ -20,7 +20,10 @@ export default function Homepage() {
   const [category, setCategory] = useState("all");
   const [chartCategory, setChartCategory] = useState("");
   const [selectedId, setSelectedId] = useState("");
+  const [mapSelectedId, setMapSelectedId] = useState("");
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const themeToggleLabel = theme === "dark" ? `☀ ${t("light")}` : `☾ ${t("dark")}`;
 
   useEffect(() => {
     setCustomProjects(getStoredProjects());
@@ -47,6 +50,17 @@ export default function Homepage() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 180);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const categoryOptions = [
     { key: "all", label: t("all") },
@@ -92,9 +106,17 @@ export default function Homepage() {
   }, [search, category, allProjects, i18n.language]);
 
   const selectedProject =
-    filteredProjects.find((project) => project.id === selectedId) || filteredProjects[0] || null;
+    filteredProjects.find((project) => project.id === selectedId) ||
+    filteredProjects[0] ||
+    null;
 
-  const numericProjects = filteredProjects.filter((project) => typeof project.progress === "number");
+  // Include Diriyah even if progress is not a number
+  const numericProjects = filteredProjects.filter(
+    (project) => typeof project.progress === "number"
+  );
+  const numericOrDiriyahProjects = filteredProjects.filter(
+    (project) => typeof project.progress === "number" || project.id === "diriyah"
+  );
   const averageProgress = numericProjects.length
     ? Math.round(
         numericProjects.reduce((sum, project) => sum + project.progress, 0) /
@@ -109,11 +131,16 @@ export default function Homepage() {
     (sum, project) => sum + project.positiveImpacts.length,
     0
   );
-
+  const selectedCategoryLabel =
+    categoryOptions.find((item) => item.key === category)?.label || t("all");
+  const hasActiveFilters = Boolean(search.trim()) || category !== "all";
+  const mapFocusedProject =
+    filteredProjects.find((project) => project.id === mapSelectedId) || selectedProject;
   const featuredProjects = filteredProjects.slice(0, 3);
 
   function scrollToProjectCard(projectId) {
     setSelectedId(projectId);
+    setMapSelectedId(projectId);
 
     window.setTimeout(() => {
       const cardElement = document.getElementById(projectCardId(projectId));
@@ -124,14 +151,7 @@ export default function Homepage() {
   }
 
   function focusProjectOnMap(projectId) {
-    setSelectedId(projectId);
-
-    window.setTimeout(() => {
-      const mapElement = document.getElementById("interactive-map-panel");
-      if (mapElement) {
-        mapElement.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 80);
+    setMapSelectedId(projectId);
   }
 
   return (
@@ -173,7 +193,7 @@ export default function Homepage() {
                   className="theme-toggle"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
-                  {theme === "dark" ? t("light") : t("dark")}
+                  {themeToggleLabel}
                 </button>
                 <Link to="/login" className="hero-link-button">
                   {t("adminLogin")}
@@ -237,7 +257,7 @@ export default function Homepage() {
                 <p>{t("videoSectionNote")}</p>
               </div>
 
-              <div className="video-frame">
+                            <div className="video-frame">
                 <iframe
                   src={VIDEO_EMBED_URL}
                   title={t("videoSectionTitle")}
@@ -329,6 +349,60 @@ export default function Homepage() {
           </div>
         </section>
 
+        <section className="results-strip">
+          <div className="results-strip__content">
+            <div className="results-strip__lead">
+              <span className="results-strip__eyebrow">
+                {i18n.language === "ar" ? "ملخص الاستكشاف" : "Exploration Summary"}
+              </span>
+              <strong>
+                {i18n.language === "ar"
+                  ? `${filteredProjects.length} مشروع ظاهر الآن`
+                  : `${filteredProjects.length} projects currently in view`}
+              </strong>
+              <p>
+                {i18n.language === "ar"
+                  ? "تابع حالة النتائج بسرعة، واعرف هل البحث أو التصنيف الحالي يؤثر على المعروض."
+                  : "A quick pulse on what is visible right now and how your filters are shaping the view."}
+              </p>
+            </div>
+
+            <div className="results-strip__stats">
+              <div className="results-stat-card">
+                <span>{i18n.language === "ar" ? "البحث الحالي" : "Search Term"}</span>
+                <strong>{search.trim() || (i18n.language === "ar" ? "بدون" : "None")}</strong>
+              </div>
+              <div className="results-stat-card">
+                <span>{i18n.language === "ar" ? "التصنيف" : "Category"}</span>
+                <strong>{selectedCategoryLabel}</strong>
+              </div>
+              <div className="results-stat-card">
+                <span>{i18n.language === "ar" ? "المشاريع المكتملة" : "Completed"}</span>
+                <strong>{completedCount}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="results-strip__actions">
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                className="results-action-button"
+                onClick={() => {
+                  setSearch("");
+                  setCategory("all");
+                }}
+              >
+                {i18n.language === "ar" ? "إعادة ضبط الفلاتر" : "Reset Filters"}
+              </button>
+            ) : (
+              <span className="results-status-pill">
+                {i18n.language === "ar" ? "كل المشاريع ظاهرة" : "All projects visible"}
+              </span>
+            )}
+          </div>
+        </section>
+
         <section className="dashboard-grid">
           <div className="dashboard-panel chart-panel">
             <div className="panel-header">
@@ -337,11 +411,11 @@ export default function Homepage() {
             </div>
 
             <div className="compare-list">
-              {numericProjects.map((project) => (
+              {numericOrDiriyahProjects.map((project) => (
                 <button
                   type="button"
                   className={`compare-item compare-item-button ${
-                    selectedProject?.id === project.id ? "active" : ""
+                    mapSelectedId === project.id ? "active" : ""
                   }`}
                   key={project.id}
                   onClick={() => focusProjectOnMap(project.id)}
@@ -350,16 +424,22 @@ export default function Homepage() {
                     <span>
                       {project.icon} {getLocalizedValue(project.name, i18n.language, "")}
                     </span>
-                    <strong>{getLocalizedValue(project.progressLabel, i18n.language, "")}</strong>
+                    <strong>
+                      {project.id === "diriyah"
+                        ? getLocalizedValue(project.progressLabel, i18n.language, "")
+                        : getLocalizedValue(project.progressLabel, i18n.language, "")}
+                    </strong>
                   </div>
                   <div className="bar">
-                    <div
-                      className="bar-fill"
-                      style={{
-                        width: `${project.progress}%`,
-                        background: project.gradient
-                      }}
-                    />
+                    {typeof project.progress === "number" ? (
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width: `${project.progress}%`,
+                          background: project.gradient
+                        }}
+                      />
+                    ) : null}
                   </div>
                 </button>
               ))}
@@ -372,10 +452,37 @@ export default function Homepage() {
               <p>{t("mapNote")}</p>
             </div>
 
+            {mapFocusedProject && (
+              <div className="map-focus-banner">
+                <div>
+                  <span className="map-focus-banner__eyebrow">
+                    {i18n.language === "ar" ? "المشروع المميز على الخريطة" : "Map Spotlight"}
+                  </span>
+                  <strong>
+                    {mapFocusedProject.icon}{" "}
+                    {getLocalizedValue(mapFocusedProject.name, i18n.language, "")}
+                  </strong>
+                  <p>
+                    {getLocalizedValue(mapFocusedProject.locationType, i18n.language, "")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="results-action-button map-focus-banner__button"
+                  onClick={() => scrollToProjectCard(mapFocusedProject.id)}
+                >
+                  {i18n.language === "ar" ? "فتح بطاقة المشروع" : "Open Project Card"}
+                </button>
+              </div>
+            )}
+
             <MapView
               projects={filteredProjects}
-              selectedId={selectedProject?.id}
-              onSelect={setSelectedId}
+              selectedId={mapSelectedId || selectedProject?.id}
+              onSelect={(projectId) => {
+                setSelectedId(projectId);
+                setMapSelectedId(projectId);
+              }}
             />
           </div>
         </section>
@@ -384,7 +491,7 @@ export default function Homepage() {
           projects={filteredProjects}
           selectedId={selectedProject?.id}
           activeCategory={chartCategory}
-          onProjectSelect={focusProjectOnMap}
+          onProjectSelect={scrollToProjectCard}
           onCategoryChange={setChartCategory}
         />
 
@@ -395,7 +502,24 @@ export default function Homepage() {
           </div>
 
           {filteredProjects.length === 0 ? (
-            <div className="empty-state">{t("noResults")}</div>
+            <div className="empty-state empty-state--rich">
+              <strong>{t("noResults")}</strong>
+              <p>
+                {i18n.language === "ar"
+                  ? "جرّب حذف كلمة البحث أو إعادة التصنيف إلى الكل حتى تستعيد عرض المشاريع بالكامل."
+                  : "Try clearing the search term or switching the category back to all to restore the full list."}
+              </p>
+              <button
+                type="button"
+                className="results-action-button"
+                onClick={() => {
+                  setSearch("");
+                  setCategory("all");
+                }}
+              >
+                {i18n.language === "ar" ? "استعادة كل المشاريع" : "Show All Projects"}
+              </button>
+            </div>
           ) : (
             <div className="projects-grid">
               {filteredProjects.map((project) => (
@@ -426,6 +550,16 @@ export default function Homepage() {
           </p>
         </div>
       </footer>
+
+      <button
+        type="button"
+        className={`scroll-top-button ${showScrollTop ? "visible" : ""}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        aria-label={i18n.language === "ar" ? "الرجوع إلى أعلى الصفحة" : "Back to top"}
+      >
+        ↑
+      </button>
     </div>
   );
 }
+

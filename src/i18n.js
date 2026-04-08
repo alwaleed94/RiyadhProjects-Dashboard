@@ -106,7 +106,7 @@ const resources = {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: "ar",
+  lng: "en",
   interpolation: {
     escapeValue: false
   }
@@ -116,6 +116,6 @@ i18n.on("languageChanged", (lng) => {
   document.documentElement.setAttribute("dir", lng === "ar" ? "rtl" : "ltr");
 });
 
-document.documentElement.setAttribute("dir", "rtl");
+document.documentElement.setAttribute("dir", "ltr");
 
 export default i18n;

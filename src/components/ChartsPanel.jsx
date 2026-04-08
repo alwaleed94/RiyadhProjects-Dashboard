@@ -52,11 +52,6 @@ export default function ChartsPanel({
   const lang = i18n.language;
   const [hoveredCategory, setHoveredCategory] = useState("");
 
-  const numericProjects = useMemo(
-    () => projects.filter((project) => typeof project.progress === "number"),
-    [projects]
-  );
-
   const categoryData = useMemo(() => {
     const categoryMap = {};
 
@@ -95,14 +90,22 @@ export default function ChartsPanel({
   const activeCategoryData =
     categoryData.find((entry) => entry.key === activeCategoryKey) || categoryData[0] || null;
 
+  const numericProjects = useMemo(
+    () => projects.filter((project) => typeof project.progress === "number"),
+    [projects]
+  );
+
   const barData = useMemo(
     () =>
       numericProjects.map((project) => ({
         ...project,
         chartName: getLocalizedValue(project.name, lang, ""),
-        chartProgressLabel: getLocalizedValue(project.progressLabel, lang, "")
+        chartProgressLabel: getLocalizedValue(project.progressLabel, lang, ""),
+        categoryKey: getLocalizedValue(project.category, "en", ""),
+        categoryMatch:
+          !activeCategoryKey || getLocalizedValue(project.category, "en", "") === activeCategoryKey
       })),
-    [numericProjects, lang]
+    [numericProjects, lang, activeCategoryKey]
   );
 
   const selectedProject =
@@ -169,8 +172,14 @@ export default function ChartsPanel({
                   {barData.map((entry) => (
                     <Cell
                       key={entry.id}
-                      fill={selectedId === entry.id ? "#38bdf8" : "#22c55e"}
-                      fillOpacity={selectedId === entry.id ? 1 : 0.72}
+                      fill={
+                        selectedId === entry.id
+                          ? "#38bdf8"
+                          : entry.categoryMatch
+                            ? "#22c55e"
+                            : "#94a3b8"
+                      }
+                      fillOpacity={selectedId === entry.id ? 1 : entry.categoryMatch ? 0.88 : 0.28}
                       cursor="pointer"
                     />
                   ))}
@@ -184,7 +193,9 @@ export default function ChartsPanel({
               <button
                 key={project.id}
                 type="button"
-                className={`chart-rank-item ${selectedId === project.id ? "active" : ""}`}
+                className={`chart-rank-item ${
+                  selectedId === project.id ? "active" : ""
+                } ${project.categoryMatch ? "category-match" : "category-dimmed"}`}
                 onClick={() => onProjectSelect?.(project.id)}
               >
                 <span className="chart-rank-item__title">
@@ -239,13 +250,6 @@ export default function ChartsPanel({
               </PieChart>
             </ResponsiveContainer>
 
-            {activeCategoryData && (
-              <div className="donut-center-card">
-                <span>{lang === "ar" ? "التصنيف النشط" : "Active Category"}</span>
-                <strong>{activeCategoryData.name}</strong>
-                <small>{activeCategoryData.shareText}</small>
-              </div>
-            )}
           </div>
 
           <div className="category-insights">
