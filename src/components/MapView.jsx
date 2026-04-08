@@ -49,6 +49,11 @@ export default function MapView({ projects, selectedId, onSelect }) {
             project.iconLabel,
             i18n.language,
             ""
+          )}</span><br/>
+          <span style="font-size:12px;color:#64748b">${getLocalizedValue(
+            project.locationType,
+            i18n.language,
+            ""
           )}</span>
         </div>
       `);

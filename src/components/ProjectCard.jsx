@@ -29,13 +29,14 @@ function progressBadge(type, lang) {
   }
 }
 
-export default function ProjectCard({ project, selected, onSelect }) {
+export default function ProjectCard({ cardId, project, selected, onSelect }) {
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const hasNumericProgress = typeof project.progress === "number";
 
   return (
     <article
+      id={cardId}
       className={`project-card ${selected ? "selected" : ""}`}
       onClick={() => onSelect(project.id)}
       role="button"

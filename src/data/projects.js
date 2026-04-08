@@ -8,7 +8,11 @@ export const projects = [
     progressType: "official",
     status: { ar: "تشغيل مكتمل", en: "Fully Operational" },
     remaining: 0,
-    location: [24.7136, 46.6753],
+    location: [24.726614, 46.666709],
+    locationType: {
+      ar: "نقطة مرجعية لشبكة المشروع",
+      en: "Representative point for the project network"
+    },
     gradient: "linear-gradient(135deg, #0891b2, #06b6d4)",
     icon: "🚇",
     image: "https://www.alyaum.com/uploads/images/2024/11/27/2452217.jfif",
@@ -48,7 +52,11 @@ export const projects = [
     progressType: "official",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 60,
-    location: [24.774265, 46.738586],
+    location: [24.767694, 46.60324],
+    locationType: {
+      ar: "نقطة مرجعية لمسار ممتد",
+      en: "Representative point for an extended corridor"
+    },
     gradient: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
     icon: "🚴",
     image: "https://www.vision2030.gov.sa/media/p22nklnn/sb-numbers4.jpg",
@@ -87,7 +95,11 @@ export const projects = [
     progressType: "official-subproject",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 14,
-    location: [24.7886, 46.6315],
+    location: [24.808118, 46.569226],
+    locationType: {
+      ar: "موقع المشروع الرئيسي",
+      en: "Main project site"
+    },
     gradient: "linear-gradient(135deg, #7c3aed, #06b6d4)",
     icon: "🏙️",
     iconLabel: { ar: "منطقة حضرية", en: "Urban Area" },
@@ -127,7 +139,11 @@ export const projects = [
     progressType: "target-indicator",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 47,
-    location: [24.6877, 46.7219],
+    location: [24.713551, 46.675296],
+    locationType: {
+      ar: "نقطة مرجعية لمبادرة تغطي أنحاء الرياض",
+      en: "Representative point for a citywide initiative"
+    },
     gradient: "linear-gradient(135deg, #059669, #10b981)",
     icon: "🌳",
     iconLabel: { ar: "تشجير", en: "Afforestation" },
@@ -167,7 +183,11 @@ export const projects = [
     progressType: "no-single-official-percent",
     status: { ar: "تطوير مرحلي", en: "Phased Development" },
     remaining: null,
-    location: [24.7442, 46.5748],
+    location: [24.73333, 46.57556],
+    locationType: {
+      ar: "موقع الدرعية التاريخية",
+      en: "Diriyah historic site"
+    },
     gradient: "linear-gradient(135deg, #92400e, #d97706)",
     icon: "🏛️",
     iconLabel: { ar: "تراث", en: "Heritage" },
@@ -207,7 +227,11 @@ export const projects = [
     progressType: "official",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 28,
-    location: [24.8049, 46.7662],
+    location: [24.95778, 46.69889],
+    locationType: {
+      ar: "موقع المطار القائم والمشروع التطويري",
+      en: "Within the current King Khalid Airport site and King Salman Airport redevelopment area"
+    },
     gradient: "linear-gradient(135deg, #0891b2, #22c55e)",
     icon: "✈️",
     iconLabel: { ar: "مطار", en: "Airport" },
@@ -247,7 +271,11 @@ export const projects = [
     progressType: "official",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 42,
-    location: [24.773, 46.707],
+    location: [24.86, 46.7],
+    locationType: {
+      ar: "موقع تقريبي ضمن نطاق المشروع",
+      en: "Approximate point within the project area"
+    },
     gradient: "linear-gradient(135deg, #8b5cf6, #3b82f6)",
     icon: "🏟️",
     iconLabel: { ar: "ملعب", en: "Stadium" },
@@ -287,7 +315,11 @@ export const projects = [
     progressType: "target-indicator",
     status: { ar: "قيد التنفيذ", en: "In Progress" },
     remaining: 32,
-    location: [24.7608, 46.7183],
+    location: [24.719, 46.724],
+    locationType: {
+      ar: "موقع الحديقة",
+      en: "Park site"
+    },
     gradient: "linear-gradient(135deg, #059669, #22c55e)",
     icon: "🌿",
     iconLabel: { ar: "حديقة", en: "Park" },
