@@ -1,81 +1,131 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { projects as baseProjects } from "../data/projects";
 import { getStoredProjects } from "../lib/storage";
+import { getLocalizedValue, normalizeProject } from "../lib/projectUtils";
 import ProjectCard from "../components/ProjectCard";
 import MapView from "../components/MapView";
 import ChartsPanel from "../components/ChartsPanel";
-
-const categories = ["الكل", "نقل", "جودة حياة", "تطوير حضري", "بيئة", "تراث وسياحة"];
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function Homepage() {
+  const { t, i18n } = useTranslation();
   const [customProjects, setCustomProjects] = useState([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [selectedId, setSelectedId] = useState("");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   useEffect(() => {
     setCustomProjects(getStoredProjects());
   }, []);
 
-  const allProjects = [...baseProjects, ...customProjects];
+  const allProjects = useMemo(
+    () => [...baseProjects, ...customProjects].map(normalizeProject),
+    [customProjects]
+  );
 
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("الكل");
-  const [selectedId, setSelectedId] = useState(allProjects[0]?.id || "");
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  useEffect(() => {
+    if (!allProjects.length) {
+      setSelectedId("");
+      return;
+    }
+
+    const exists = allProjects.some((project) => project.id === selectedId);
+    if (!exists) {
+      setSelectedId(allProjects[0].id);
+    }
+  }, [allProjects, selectedId]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const filteredProjects = useMemo(() => {
-    return allProjects.filter((project) => {
-      const term = search.trim();
-      const matchSearch =
-        project.name.includes(term) ||
-        project.summary.includes(term) ||
-        project.category.includes(term);
+  const categoryOptions = [
+    { key: "all", label: t("all") },
+    { key: "transport", label: t("transport") },
+    { key: "qualityOfLife", label: t("qualityOfLife") },
+    { key: "urbanDevelopment", label: t("urbanDevelopment") },
+    { key: "environment", label: t("environment") },
+    { key: "heritageAndTourism", label: t("heritageAndTourism") }
+  ];
 
-      const matchCategory = category === "الكل" || project.category === category;
+  const categoryMap = {
+    all: "الكل",
+    transport: "نقل",
+    qualityOfLife: "جودة حياة",
+    urbanDevelopment: "تطوير حضري",
+    environment: "بيئة",
+    heritageAndTourism: "تراث وسياحة"
+  };
+
+  const filteredProjects = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
+    return allProjects.filter((project) => {
+      const name = String(getLocalizedValue(project.name, i18n.language, "")).toLowerCase();
+      const summary = String(getLocalizedValue(project.summary, i18n.language, "")).toLowerCase();
+      const localizedCategory = String(
+        getLocalizedValue(project.category, i18n.language, "")
+      ).toLowerCase();
+      const arabicCategory = String(getLocalizedValue(project.category, "ar", "")).toLowerCase();
+
+      const matchSearch =
+        !term ||
+        name.includes(term) ||
+        summary.includes(term) ||
+        localizedCategory.includes(term) ||
+        arabicCategory.includes(term);
+
+      const matchCategory =
+        category === "all" || getLocalizedValue(project.category, "ar", "") === categoryMap[category];
+
       return matchSearch && matchCategory;
     });
-  }, [search, category, allProjects]);
+  }, [search, category, allProjects, i18n.language]);
 
   const selectedProject =
-    filteredProjects.find((p) => p.id === selectedId) || filteredProjects[0] || null;
+    filteredProjects.find((project) => project.id === selectedId) || filteredProjects[0] || null;
 
-  const numericProjects = filteredProjects.filter((p) => typeof p.progress === "number");
-
+  const numericProjects = filteredProjects.filter((project) => typeof project.progress === "number");
   const averageProgress = numericProjects.length
-    ? Math.round(
-        numericProjects.reduce((sum, p) => sum + p.progress, 0) / numericProjects.length
-      )
+    ? Math.round(numericProjects.reduce((sum, project) => sum + project.progress, 0) / numericProjects.length)
     : 0;
-
-  const completedCount = filteredProjects.filter((p) => p.progress === 100).length;
-
+  const completedCount = filteredProjects.filter((project) => project.progress === 100).length;
   const inProgressCount = filteredProjects.filter(
-    (p) => typeof p.progress === "number" && p.progress < 100
+    (project) => typeof project.progress === "number" && project.progress < 100
   ).length;
-
   const positiveImpactCount = filteredProjects.reduce(
-    (sum, p) => sum + p.positiveImpacts.length,
+    (sum, project) => sum + project.positiveImpacts.length,
     0
   );
 
   return (
     <div className="app-shell">
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: i18n.language === "ar" ? "flex-start" : "flex-end",
+          alignItems: "center",
+          padding: "18px 0 0 0",
+          position: "relative",
+          zIndex: 1000
+        }}
+      >
+        <LanguageSwitcher />
+      </div>
+
       <footer className="footer">
         <div className="footer-content">
           <p>
-            تم التنفيذ بواسطة <strong>الوليد بن نوح</strong> © 2026
+            {t("implementedBy")}{" "}
+            <strong>{i18n.language === "ar" ? "الوليد بن نوح" : "ALWALEED BIN NOUH"}</strong> © 2026
           </p>
           <p style={{ margin: 0, whiteSpace: "nowrap" }}>
-            <span style={{ marginLeft: 6 }}></span>
-            <a
-              href="mailto:alwaleednu@gmail.com"
-              className="footer-link"
-              style={{ marginLeft: 10 }}
-            >
+            <a href="mailto:alwaleednu@gmail.com" className="footer-link" style={{ marginLeft: 10 }}>
               alwaleednu@gmail.com
             </a>
             <span style={{ margin: "0 8px" }}>|</span>
@@ -91,73 +141,78 @@ export default function Homepage() {
           </p>
         </div>
       </footer>
+
       <header className="hero">
         <div className="hero__overlay" />
 
         <div className="container hero__content">
           <div className="hero__text">
             <div className="top-line">
-              <span className="hero-badge">لوحة تفاعلية</span>
+              <span className="hero-badge">{t("interactiveDashboard")}</span>
 
               <div style={{ display: "flex", gap: "10px" }}>
                 <button
                   className="theme-toggle"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
-                  {theme === "dark" ? "☀️ لايت" : "🌙 دارك"}
+                  {theme === "dark" ? t("light") : t("dark")}
                 </button>
-                <Link to="/login" style={{ padding: "8px 16px", background: "#3b82f6", color: "white", borderRadius: "6px", textDecoration: "none", cursor: "pointer" }}>
-                  دخول إداري
+                <Link
+                  to="/login"
+                  style={{
+                    padding: "8px 16px",
+                    background: "#3b82f6",
+                    color: "white",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  {t("adminLogin")}
                 </Link>
               </div>
             </div>
 
-            <h1>مشاريع الرياض</h1>
-            <p>
-              موقع تفاعلي يعرض نسبة الإنجاز، المتبقي، الآثار الإيجابية،
-              والخريطة التفاعلية لمجموعة من مشاريع الرياض.
-            </p>
+            <h1>{t("riyadhProjects")}</h1>
+            <p>{t("description")}</p>
 
             <div className="kpi-grid">
               <div className="kpi-card">
-                <span>إجمالي المشاريع</span>
+                <span>{t("totalProjects")}</span>
                 <strong>{filteredProjects.length}</strong>
               </div>
 
               <div className="kpi-card">
-                <span>متوسط التقدم</span>
+                <span>{t("averageProgress")}</span>
                 <strong>{averageProgress}%</strong>
               </div>
 
               <div className="kpi-card">
-                <span>مشاريع مكتملة</span>
+                <span>{t("completedProjects")}</span>
                 <strong>{completedCount}</strong>
               </div>
 
               <div className="kpi-card">
-                <span>مشاريع قيد التنفيذ</span>
+                <span>{t("projectsInProgress")}</span>
                 <strong>{inProgressCount}</strong>
               </div>
 
               <div className="kpi-card">
-                <span>إجمالي الآثار الإيجابية</span>
+                <span>{t("totalPositiveImpacts")}</span>
                 <strong>{positiveImpactCount}</strong>
               </div>
             </div>
           </div>
 
           <div className="hero__glass">
-            <h2>ملخص سريع</h2>
-            <p>
-              بعض الأرقام رسمية، وبعضها مؤشرات متابعة أو حالات مرحلية،
-              لذلك تم توضيح نوع كل نسبة داخل البطاقة.
-            </p>
+            <h2>{t("quickSummary")}</h2>
+            <p>{t("summaryNote")}</p>
 
             {selectedProject && (
               <div className="hero-focus">
-                <span>المشروع المحدد</span>
-                <strong>{selectedProject.name}</strong>
-                <small>{selectedProject.progressLabel}</small>
+                <span>{t("selectedProject")}</span>
+                <strong>{getLocalizedValue(selectedProject.name, i18n.language, "")}</strong>
+                <small>{getLocalizedValue(selectedProject.progressLabel, i18n.language, "")}</small>
               </div>
             )}
           </div>
@@ -167,26 +222,26 @@ export default function Homepage() {
       <main className="container main-content">
         <section className="toolbar">
           <div className="search-box">
-            <label htmlFor="search">ابحث عن مشروع</label>
+            <label htmlFor="search">{t("searchLabel")}</label>
             <input
               id="search"
               type="text"
-              placeholder="مثال: مترو، درعية، خضراء..."
+              placeholder={t("searchPlaceholder")}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
           <div className="filters">
-            <span>التصنيف</span>
+            <span>{t("category")}</span>
             <div className="filter-pills">
-              {categories.map((item) => (
+              {categoryOptions.map((item) => (
                 <button
-                  key={item}
-                  className={category === item ? "active" : ""}
-                  onClick={() => setCategory(item)}
+                  key={item.key}
+                  className={category === item.key ? "active" : ""}
+                  onClick={() => setCategory(item.key)}
                 >
-                  {item}
+                  {item.label}
                 </button>
               ))}
             </div>
@@ -196,16 +251,18 @@ export default function Homepage() {
         <section className="dashboard-grid">
           <div className="dashboard-panel chart-panel">
             <div className="panel-header">
-              <h2>مقارنة التقدم</h2>
-              <p>الأشرطة أدناه تمثل المشاريع ذات النسب الرقمية فقط.</p>
+              <h2>{t("progressComparison")}</h2>
+              <p>{t("progressNote")}</p>
             </div>
 
             <div className="compare-list">
               {numericProjects.map((project) => (
                 <div className="compare-item" key={project.id}>
                   <div className="compare-top">
-                    <span>{project.icon} {project.name}</span>
-                    <strong>{project.progressLabel}</strong>
+                    <span>
+                      {project.icon} {getLocalizedValue(project.name, i18n.language, "")}
+                    </span>
+                    <strong>{getLocalizedValue(project.progressLabel, i18n.language, "")}</strong>
                   </div>
                   <div className="bar">
                     <div
@@ -223,8 +280,8 @@ export default function Homepage() {
 
           <div className="dashboard-panel map-panel">
             <div className="panel-header">
-              <h2>الخريطة التفاعلية</h2>
-              <p>اضغط على أي مشروع لإبرازه.</p>
+              <h2>{t("interactiveMap")}</h2>
+              <p>{t("mapNote")}</p>
             </div>
 
             <MapView
@@ -239,12 +296,12 @@ export default function Homepage() {
 
         <section className="projects-section">
           <div className="section-head">
-            <h2>بطاقات المشاريع</h2>
-            <p>تحتوي على المحقق، المتبقي، المؤشرات، والآثار الإيجابية.</p>
+            <h2>{t("projectCards")}</h2>
+            <p>{t("projectCardsNote")}</p>
           </div>
 
           {filteredProjects.length === 0 ? (
-            <div className="empty-state">لا توجد نتائج مطابقة.</div>
+            <div className="empty-state">{t("noResults")}</div>
           ) : (
             <div className="projects-grid">
               {filteredProjects.map((project) => (

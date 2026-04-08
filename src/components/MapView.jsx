@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import L from "leaflet";
+import { useTranslation } from "react-i18next";
+import { getLocalizedValue } from "../lib/projectUtils";
 
 const createIcon = (emoji) =>
   L.divIcon({
@@ -11,15 +13,22 @@ const createIcon = (emoji) =>
   });
 
 export default function MapView({ projects, selectedId, onSelect }) {
+  const { i18n } = useTranslation();
+  const mapRef = useRef(null);
+
   useEffect(() => {
-    const map = L.map("map", {
+    if (!mapRef.current) {
+      return undefined;
+    }
+
+    const map = L.map(mapRef.current, {
       center: [24.7136, 46.6753],
       zoom: 10,
       zoomControl: true
     });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors"
+      attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
 
     const bounds = [];
@@ -30,10 +39,17 @@ export default function MapView({ projects, selectedId, onSelect }) {
       }).addTo(map);
 
       marker.bindPopup(`
-        <div style="font-family: Arial; direction: rtl; text-align: right; min-width: 180px">
-          <strong>${project.name}</strong><br/>
-          <span>${project.status}</span><br/>
-          <small>${project.progressLabel}</small>
+        <div style="font-family: Arial, sans-serif; direction: ${
+          i18n.language === "ar" ? "rtl" : "ltr"
+        }; text-align: ${i18n.language === "ar" ? "right" : "left"}; min-width: 180px">
+          <strong>${project.icon} ${getLocalizedValue(project.name, i18n.language, "")}</strong><br/>
+          <span>${getLocalizedValue(project.status, i18n.language, "")}</span><br/>
+          <small>${getLocalizedValue(project.progressLabel, i18n.language, "")}</small><br/>
+          <span style="font-size:12px;color:#888">${getLocalizedValue(
+            project.iconLabel,
+            i18n.language,
+            ""
+          )}</span>
         </div>
       `);
 
@@ -50,7 +66,7 @@ export default function MapView({ projects, selectedId, onSelect }) {
     }
 
     return () => map.remove();
-  }, [projects, selectedId, onSelect]);
+  }, [projects, selectedId, onSelect, i18n.language]);
 
-  return <div id="map" className="map-box" />;
+  return <div ref={mapRef} className="map-box" />;
 }

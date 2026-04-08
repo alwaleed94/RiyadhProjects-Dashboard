@@ -1,7 +1,22 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import ProgressRing from "./ProgressRing";
+import { getLocalizedValue } from "../lib/projectUtils";
 
-function progressBadge(type) {
+function progressBadge(type, lang) {
+  if (lang === "en") {
+    switch (type) {
+      case "official":
+        return "Official";
+      case "official-subproject":
+        return "Official (Subproject)";
+      case "target-indicator":
+        return "Target Indicator";
+      default:
+        return "Phased Status";
+    }
+  }
+
   switch (type) {
     case "official":
       return "رسمي";
@@ -15,6 +30,8 @@ function progressBadge(type) {
 }
 
 export default function ProjectCard({ project, selected, onSelect }) {
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
   const hasNumericProgress = typeof project.progress === "number";
 
   return (
@@ -24,37 +41,43 @@ export default function ProjectCard({ project, selected, onSelect }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onSelect(project.id);
+        if (e.key === "Enter" || e.key === " ") {
+          onSelect(project.id);
+        }
       }}
     >
       <div className="project-card__top" style={{ background: project.gradient }}>
         <div>
-          <span className="pill">{project.category}</span>
-          <h3>{project.icon} {project.name}</h3>
-          <p>{project.summary}</p>
+          <span className="pill">{getLocalizedValue(project.category, lang, "")}</span>
+          <h3>
+            {project.icon} {getLocalizedValue(project.name, lang, "")}
+          </h3>
+          <p>{getLocalizedValue(project.summary, lang, "")}</p>
           {project.image && (
-            <img 
-              src={project.image} 
-              alt={project.name}
-              style={{ 
-                width: '100%', 
-                height: '120px', 
-                objectFit: 'cover', 
-                borderRadius: '8px', 
-                marginTop: '10px',
-                border: '2px solid rgba(255,255,255,0.2)'
+            <img
+              src={project.image}
+              alt={getLocalizedValue(project.name, lang, "")}
+              style={{
+                width: "100%",
+                height: "120px",
+                objectFit: "cover",
+                borderRadius: "8px",
+                marginTop: "10px",
+                border: "2px solid rgba(255,255,255,0.2)"
               }}
             />
           )}
         </div>
-
         <div className="project-card__ring">
           {hasNumericProgress ? (
-            <ProgressRing value={project.progress} label={project.progressLabel} />
+            <ProgressRing
+              value={project.progress}
+              label={getLocalizedValue(project.progressLabel, lang, "")}
+            />
           ) : (
             <div className="no-progress">
-              <strong>{project.progressLabel}</strong>
-              <span>لا توجد نسبة موحدة</span>
+              <strong>{getLocalizedValue(project.progressLabel, lang, "")}</strong>
+              <span>{lang === "ar" ? "لا توجد نسبة موحدة" : "No official percentage"}</span>
             </div>
           )}
         </div>
@@ -63,27 +86,25 @@ export default function ProjectCard({ project, selected, onSelect }) {
       <div className="project-card__body">
         <div className="mini-grid">
           <div>
-            <span className="mini-label">الحالة</span>
-            <strong>{project.status}</strong>
+            <span className="mini-label">{lang === "ar" ? "الحالة" : "Status"}</span>
+            <strong>{getLocalizedValue(project.status, lang, "")}</strong>
           </div>
           <div>
-            <span className="mini-label">نوع النسبة</span>
-            <strong>{progressBadge(project.progressType)}</strong>
+            <span className="mini-label">{lang === "ar" ? "نوع النسبة" : "Progress Type"}</span>
+            <strong>{progressBadge(project.progressType, lang)}</strong>
           </div>
           <div>
-            <span className="mini-label">المتبقي</span>
+            <span className="mini-label">{lang === "ar" ? "المتبقي" : "Remaining"}</span>
             <strong>
-              {typeof project.remaining === "number"
-                ? `${project.remaining}%`
-                : "غير متاح"}
+              {typeof project.remaining === "number" ? `${project.remaining}%` : lang === "ar" ? "غير متاح" : "N/A"}
             </strong>
           </div>
         </div>
 
         <div className="bar-wrap">
           <div className="bar-meta">
-            <span>المحقق</span>
-            <span>{project.progressLabel}</span>
+            <span>{lang === "ar" ? "المحقق" : "Achieved"}</span>
+            <span>{getLocalizedValue(project.progressLabel, lang, "")}</span>
           </div>
           <div className="bar">
             <div
@@ -97,35 +118,36 @@ export default function ProjectCard({ project, selected, onSelect }) {
         </div>
 
         <div className="detail-box">
-          <h4>ما تحقق</h4>
-          <p>{project.achievedText}</p>
+          <h4>{lang === "ar" ? "ما تحقق" : "Achieved"}</h4>
+          <p>{getLocalizedValue(project.achievedText, lang, "")}</p>
         </div>
 
         <div className="detail-box">
-          <h4>ما المتبقي</h4>
-          <p>{project.remainingText}</p>
+          <h4>{lang === "ar" ? "ما المتبقي" : "Remaining Work"}</h4>
+          <p>{getLocalizedValue(project.remainingText, lang, "")}</p>
         </div>
 
         <div className="impact-box">
-          <h4>الآثار الإيجابية</h4>
+          <h4>{lang === "ar" ? "الآثار الإيجابية" : "Positive Impacts"}</h4>
           <ul>
-            {project.positiveImpacts.map((item) => (
-              <li key={item}>{item}</li>
+            {project.positiveImpacts.map((item, idx) => (
+              <li key={idx}>{getLocalizedValue(item, lang, "")}</li>
             ))}
           </ul>
         </div>
 
         <div className="metrics-grid">
-          {project.metrics.map((metric) => (
-            <div className="metric-card" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{metric.value}</strong>
+          {project.metrics.map((metric, idx) => (
+            <div className="metric-card" key={idx}>
+              <span>{getLocalizedValue(metric.label, lang, "")}</span>
+              <strong>{getLocalizedValue(metric.value, lang, "")}</strong>
             </div>
           ))}
         </div>
 
         <div className="source-note">
-          <strong>ملاحظة البيانات:</strong> {project.sourceNote}
+          <strong>{lang === "ar" ? "ملاحظة البيانات:" : "Data Note:"}</strong>{" "}
+          {getLocalizedValue(project.sourceNote, lang, "")}
         </div>
       </div>
     </article>
