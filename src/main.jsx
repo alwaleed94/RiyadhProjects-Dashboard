@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import Homepage from "./pages/Homepage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   </React.StrictMode>
 );
